@@ -9,7 +9,7 @@ import datetime
 
 plugins = dict(root="core")
 
-app = Client("telegram_service", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, plugins=plugins)
+app = Client("telegram_service12", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, plugins=plugins)
 
 
 sended_today = False

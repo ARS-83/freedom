@@ -1,6 +1,6 @@
-alembic revision --autogenerate -m "create users table"
-alembic upgrade head
-alembic current        # نسخه فعلی دیتابیس
-alembic history        # تاریخچه migrationها
-alembic downgrade -1   # برگشت یک مرحله
-alembic downgrade base # برگشت به اول
+alembic revision --autogenerate -m "create users table"  # create migration
+alembic upgrade head # upgrade database
+alembic current        # current version db
+alembic history        # migration history
+alembic downgrade -1   # back to before level
+alembic downgrade base # back to first

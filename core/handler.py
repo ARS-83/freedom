@@ -83,13 +83,23 @@ async def setting_handler(c:Client, m:Message):
 async def callback(c:Client, q:CallbackQuery):
     if "getlistc_" in q.data:
         provider = q.data.split("_")[1]
-
         await get_config_list_btn(c, q, provider, 15, 0)
 
     if "next_" in q.data:
-        skip = 0
-        limit = 0
-        await get_config_list_btn(c, q, pro)
+        data = q.data.split("_")
+        provider = q.data.split("_")[1]
+        limit = int(data[2])
+        skip = int(data[3])
+        page = int(data[4])
+        await get_config_list_btn(c, q, provider, limit, skip=skip, page=page)
+
+    if 'back_' in q.data:
+        data = q.data.split("_")
+        provider = q.data.split("_")[1]
+        limit = int(data[2])
+        skip = int(data[3])
+        page = int(data[4])
+        await get_config_list_btn(c, q, provider, limit, skip=skip, page=page)
 
 
     if 'likeservice_' in q.data:
