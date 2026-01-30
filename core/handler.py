@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup ,InlineQueryResultArticle, InputTextMessageContent,InlineQuery
 from .btns import *
 from config import ADMIN_IDS , CHANEL_ID
 from context.services import config_service, user_service
@@ -18,7 +18,18 @@ async def start(c:Client, m:Message):
 🐝 (صرفا برای اطلاع رسانی) تنها چنل رسمی ربات آزاد: @{CHANEL_ID}
 **
 """, reply_markup=await main_key(m.from_user.id))
+
     await user_service.update_user_step(m.from_user.id, "home")
+    if len(m.command)> 1:
+        service_id = int(m.command[1].split("_")[1])
+
+        await m.reply("""📌 مواردی که باید در نظر بگیرید  :
+
+⚠️ درصورتی محتوایی بجز کانفیگ برای اتصال دریافت کرید حتما گزارش کنید 
+👮🏻‍♀️ ترجیحا کلاینت رو از جای مورد اطمینان دانلود و نصب کنید افراد سود جو از این موقعیت ها هم برای خوردن خون شما استفاده میکنند 
+
+                              """)
+        await get_config(c, m, service_id)
 
 
 @Client.on_message(filters.regex("🚀 دریافت کانفیگ"))
@@ -31,6 +42,14 @@ async def configs_handler(c:Client, m:Message):
                   """, reply_markup=InlineKeyboardMarkup(get_type_btn_object))
 
 
+
+@Client.on_message(filters.regex("برترین ها 🪽"))
+async def best_configs_handler(c:Client, m:Message):
+    await m.reply("""🕊 لیست بهترین به اشتراک گذارنده های آزاد 
+                  برترین ها در بالای لیست سروریس ها قرار میگیرند و 
+                  
+                  """, reply_markup=InlineKeyboardMarkup(await get_best_btn_object()))
+    
 @Client.on_message(filters.regex("🤝 افزودن کانفیگ"))
 async def add_configs_handler(c:Client, m:Message):
         await user_service.update_user_step(m.from_user.id, "addconfig")
@@ -150,7 +169,7 @@ async def callback(c:Client, q:CallbackQuery):
                               """)
 
         service_id = int(q.data.split('_')[1])
-        await get_config(c, q,service_id)
+        await get_config(c, q.message, service_id)
 
 
     if q.data == "add_config":
@@ -207,7 +226,7 @@ async def callback(c:Client, q:CallbackQuery):
                                 """)
 
             service_id = int(q.data.split('_')[1])
-            await get_config(c, q,service_id)
+            await get_config(c, q.message, service_id)
             await q.message.reply('در صورتی که مورد تایید بود تایید را فشار داده تا در اختیار عموم قرار گیرد', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("تایید", callback_data=f"approve_{service_id}"), InlineKeyboardButton("انصراف", callback_data=f"cancel_{service_id}")]]))
         if 'approve_' in q.data:
             service_id = int(q.data.split('_')[1])
@@ -254,3 +273,90 @@ async def callback(c:Client, q:CallbackQuery):
             user_count = await user_service.get_user_count()
             active_configs = await config_service.count_configs_active()
             await q.message.reply(f"👤 تعداد کل کاربران ثبت شده: {user_count}\n\n📂 تعداد کل سرویس های فعال: {active_configs}")
+
+
+
+
+
+provide_btns = [
+    "mtn",
+   "mci",
+  "rightel",
+    "other",
+    "alls",
+]
+gifs = [
+    'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjgxanFpbjFhbHphczIxaHVjajlza2hodjh0bmFvY2J0enh4cm5tbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/u7A8q8nbNuJqcGCeU6/giphy.gif',
+    'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXpmNTBiY21nNzI1d3J2YWY3eDAyb3Fud3ZtMXJoNmhqZjFiY2p2MCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1Vh0XS1A9VbKHgX4Q6/giphy.gif',
+    'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZHVkeTRheHl3bmhkMTF3ZXMyZDRkYjQ2Y3p0OWd6Z21kY2d5dzgzaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UmnWEKDFoPmcZHmwFl/giphy.gif',
+    'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGM0bDFmNXVyNXRsbG1iNTR4Mm5wdGZ3MXBwMmhpdGR0cGExcjBucyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aC599eApaGVRUpJ72/giphy.gif'
+]
+import random
+
+@Client.on_inline_query() 
+async def answer(client:Client,inline_query:InlineQuery):
+   
+   if inline_query.query =="" or inline_query.query in provide_btns:
+      
+      data = await get_all_service(20,0, provider=str(inline_query.query))
+      service:Service = None  
+      queryRes = []
+      provide_btn = {"mtn":"ایرانسل","mci":"همراه اول","rightel":"رایتل","other":"بقیه چیزا","alls":"همه"}
+      userbptname = await client.get_me() 
+      for service, likes, dislikes in data:
+          queryRes.append( InlineQueryResultArticle(
+               thumb_url=random.choice(gifs),
+                title=f'اینترنت سرویس: {provide_btn[service.providers]} - {"VIP" if service.is_vip else ""}',
+                input_message_content=InputTextMessageContent(
+                   f"""🤝 دوست عزیز برای دریافت سرویس لطفا دکمه دریافت زیر رو فشار بده 
+                   
+.
+                   """   ),
+                
+                
+                description=f"""{service.creator.name} - {service.type_product} - 👍🏻{str(likes)}  """ ,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton('🔗 دریافت سرویس', url=f"https://t.me/{userbptname.username}?start=getconfig_{service.id}")],
+                        [InlineKeyboardButton(
+                            "🕊 کانال آزاد ",
+                            url=f"https://t.me/{CHANEL_ID}"
+                        )]
+                    ]
+                )
+            ),)
+      if not queryRes:
+            await inline_query.answer( results=[],switch_pm_text = f"پییدا نشد",switch_pm_parameter="ARS",cache_time=0)
+
+      await inline_query.answer(results=queryRes, cache_time=0, switch_pm_text = f"☘️ لیست سرویس ها ",switch_pm_parameter="ARS")
+      return
+#    if "pro:mci" in inline_query.query:
+#     if inline_query.query != "SearchMovie:" :
+    
+#       services = await get_all_service(15, 0, provider=)
+#       queryRes = []
+
+#       if len(data) == 0:
+#          await inline_query.answer( results=[],switch_pm_text = f"پییدا نشد",switch_pm_parameter="ARS",cache_time=0)
+#          return
+
+#       else:
+#             for res in data :
+#                queryRes.append(InlineQueryResultArticle(
+#                   thumb_url=res[12],
+#                 title=res[1],
+#                 input_message_content=InputTextMessageContent(
+#                    f"""فیلم:{res[1]}"""   ),
+             
+#                 description=res[7],
+#                 reply_markup=InlineKeyboardMarkup(
+#                     [
+#                         [InlineKeyboardButton(
+#                             "چنل",
+#                             url=f"https://t.me/{CHANEL}"
+#                         )]
+#                     ]
+#                 )
+#             ))
+#             await inline_query.answer(results=queryRes,switch_pm_text = f"تعداد : {len(data)}",switch_pm_parameter="ARS",cache_time=0)
+
+   

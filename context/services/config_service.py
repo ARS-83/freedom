@@ -1,6 +1,6 @@
 from context.models import Service, Setting, User , Likes, Report, Details
 from context.database import AsyncSessionLocal
-from sqlalchemy import select, func, case, desc
+from sqlalchemy import select, func, case, desc,asc
 from sqlalchemy.orm import selectinload
 
 
@@ -127,9 +127,9 @@ async def get_all_service(limit:int=15, skiped:int=0, provider=''):
             .where(Service.is_active == True, Service.providers.contains(provider))
             .group_by(Service.id)
             .order_by(
+                desc(func.coalesce(likes_count, 0) ),
+                asc(func.coalesce(dislikes_count, 0)),
                 desc(Service.is_vip),
-                Service.type_product,
-                desc(func.coalesce(likes_count, 0)),
             ).limit(limit).offset(skiped)
         )
 

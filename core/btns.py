@@ -1,4 +1,5 @@
 from context.services.config_service import get_setting, get_all_service, get_service
+from context.services.user_service import get_best_btn_object
 from pyrogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
@@ -13,6 +14,7 @@ from context.models import Service, Setting, User, Likes
 
 main_keys = [
     "🚀 دریافت کانفیگ",
+    "برترین ها 🪽",
     "🤝 افزودن کانفیگ",
     "☎️ ارتباط با من",
     "مدیریت",
@@ -63,7 +65,7 @@ def type_btn_object(provider: str):
         ],
         [
             InlineKeyboardButton(
-                "netmod - http injector", callback_data="type_mod_" + provider
+                "netmod - http injector", callback_data="type_netmod_" + provider
             ),
             InlineKeyboardButton("other vpns", callback_data="type_v2ray_" + provider),
         ],
@@ -95,7 +97,7 @@ main_admin_key = InlineKeyboardButton(
 async def main_key(user_id: int = 0):
     btns = ReplyKeyboardMarkup(
         [
-            ["🚀 دریافت کانفیگ"],
+            ["🚀 دریافت کانفیگ", "برترین ها 🪽"],
             ["🤝 افزودن کانفیگ", "☎️ ارتباط با من"],
         ],
         resize_keyboard=True,
@@ -126,7 +128,20 @@ async def get_service_btn(service_id: int):
     return btns
 
 
+async def get_best_btn_object():
+    btns = []
+    top_users = await get_best_btn_object()
+    for user, likes, services in top_users:
+        btns.append(
+            [
+                InlineKeyboardButton(f"👤{user.name} - 👍{likes} - 🌐{services}", callback_data=f"ars"),
+            ]
+        )
+    return btns
+
+
 async def general_settings_key():
+    
     setting = await get_setting()
     btns = InlineKeyboardMarkup(
         [

@@ -8,13 +8,13 @@ from pyrogram.types import (
     InlineKeyboardButton,
     ReplyKeyboardMarkup,
 )
-async def get_config(c: Client, m: CallbackQuery, service_id: int):
+async def get_config(c: Client, m: Message, service_id: int):
     service = await config_service.get_service_by_id(service_id)
     for detail in service.details:
         print(service.creator)
-        await c.copy_message(chat_id=m.message.chat.id, from_chat_id=service.creator.user_id, message_id=int(detail.message_id))
+        await c.copy_message(chat_id=m.chat.id, from_chat_id=service.creator.user_id, message_id=int(detail.message_id))
 
-    await m.message.reply('🤝 ارسال محتوا این سرویس انجام شد لطفا در نظر سنجی زیر شرکت کنید برای بهبود کیفیت کار ',reply_markup=InlineKeyboardMarkup(
+    await m.reply('🤝 ارسال محتوا این سرویس انجام شد لطفا در نظر سنجی زیر شرکت کنید برای بهبود کیفیت کار ',reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(f"👍🏻", callback_data=f"likeservice_{service.id}"),

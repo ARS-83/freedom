@@ -1,9 +1,38 @@
-from context.models import User
+from context.models import Service, Setting, User , Likes, Report, Details
 from context.database import AsyncSessionLocal
 from config import ADMIN_IDS
-from sqlalchemy import select, func, case, desc
+from sqlalchemy import select, func, case, desc,distinct
+from sqlalchemy.orm import selectinload
+
+
+
+async def get_best_btn_object():
+    async with AsyncSessionLocal() as session:
+
+        stmt = (
+            select(
+                User,
+                func.count(distinct(Likes.id)).label("likes_count"),
+                func.count(distinct(Service.id)).label("services_count"),
+            )
+            .outerjoin(Service, Service.created_by_user_id == User.user_id)
+            .outerjoin(
+                Likes,
+                (Likes.service_id == Service.id) & (Likes.is_like == True)
+            )
+            .group_by(User.id)
+            .order_by(
+                func.count(distinct(Likes.id)).desc(),      # اول تعداد لایک
+                func.count(distinct(Service.id)).desc(),    # بعد تعداد سرویس
+            )
+            .limit(5)
+        )
+
+        result = await session.execute(stmt)
+        return result.all()
 
 async def add_user_if_exists(user_data):
+    
     async with AsyncSessionLocal() as session:
         user = await session.execute(
             User.__table__.select().where(User.user_id == user_data.id)
