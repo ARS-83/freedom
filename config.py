@@ -1,6 +1,6 @@
-API_ID = 27920385
-API_HASH = "6ef7b57f85f5d96dfbde6b4fd36412be"
-BOT_TOKEN = "7071614666:AAGhXKhLkoZu3WvT7heQg02EzFQf2cmXjTM"
+API_ID = 111111111
+API_HASH = "ares"
+BOT_TOKEN = "fsdfsdfdsfsfsdf"
 DATABASE_URL = "sqlite+aiosqlite:///database.db"
 DOMAIN = 'mydomain.com'
 ADMIN_IDS = [5982685460]  # Example admin user IDs
